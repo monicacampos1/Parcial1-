@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Autores y Libros</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div id="app" class="container mt-5">
+    <!-- Formulario de registro de autor -->
+    <div class="card">
+      <div class="card-header">
+        Registro de Autor
+      </div>
+      <div class="card-body">
+        <form @submit.prevent="addOrUpdateAutor">
+          <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" class="form-control" id="nombre" v-model="autor.nombre" required>
+          </div>
+          <div class="form-group">
+            <label for="codigo">Código:</label>
+            <input type="text" class="form-control" id="codigo" v-model="autor.codigo" required>
+          </div>
+          <div class="form-group">
+            <label for="pais">País:</label>
+            <input type="text" class="form-control" id="pais" v-model="autor.pais" required>
+          </div>
+          <div class="form-group">
+            <label for="telefono">Teléfono:</label>
+            <input type="text" class="form-control" id="telefono" v-model="autor.telefono" required>
+          </div>
+          <button type="submit" class="btn btn-primary">{{ editingAutorIndex === null ? 'Agregar Autor' : 'Actualizar Autor' }}</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Lista de autores -->
+    <div class="card mt-3">
+      <div class="card-header">
+        Lista de Autores
+      </div>
+      <div class="card-body">
+        <ul class="list-group">
+          <li class="list-group-item" v-for="(autor, index) in autores" :key="index">
+            {{ autor.nombre }} - {{ autor.codigo }} - {{ autor.pais }} - {{ autor.telefono }}
+            <button class="btn btn-primary btn-sm float-right mr-2" @click="editAutor(index)">Editar</button>
+            <button class="btn btn-danger btn-sm float-right" @click="deleteAutor(index)">Eliminar</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Formulario de registro de libro -->
+    <div class="card mt-5">
+      <div class="card-header">
+        Registro de Libro
+      </div>
+      <div class="card-body">
+        <form @submit.prevent="addOrUpdateLibro">
+          <div class="form-group">
+            <label for="titulo">Título:</label>
+            <input type="text" class="form-control" id="titulo" v-model="libro.titulo" required>
+          </div>
+          <div class="form-group">
+            <label for="autor">Autor:</label>
+            <input type="text" class="form-control" id="autor" v-model="libro.autor" required>
+          </div>
+          <div class="form-group">
+            <label for="isbn">ISBN:</label>
+            <input type="text" class="form-control" id="isbn" v-model="libro.isbn" required>
+          </div>
+          <div class="form-group">
+            <label for="editorial">Editorial:</label>
+            <input type="text" class="form-control" id="editorial" v-model="libro.editorial" required>
+          </div>
+          <div class="form-group">
+            <label for="edicion">Edición:</label>
+            <input type="text" class="form-control" id="edicion" v-model="libro.edicion" required>
+          </div>
+          <button type="submit" class="btn btn-primary">{{ editingLibroIndex === null ? 'Agregar Libro' : 'Actualizar Libro' }}</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Lista de libros -->
+    <div class="card mt-3">
+      <div class="card-header">
+        Lista de Libros
+      </div>
+      <div class="card-body">
+        <ul class="list-group">
+          <li class="list-group-item" v-for="(libro, index) in libros" :key="index">
+            {{ libro.titulo }} - {{ libro.autor }} - {{ libro.isbn }} - {{ libro.editorial }} - {{ libro.edicion }}
+            <button class="btn btn-primary btn-sm float-right mr-2" @click="editLibro(index)">Editar</button>
+            <button class="btn btn-danger btn-sm float-right" @click="deleteLibro(index)">Eliminar</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        autor: {
+          nombre: '',
+          codigo: '',
+          pais: '',
+          telefono: ''
+        },
+        autores: [],
+        libro: {
+          titulo: '',
+          autor: '',
+          isbn: '',
+          editorial: '',
+          edicion: ''
+        },
+        libros: [],
+        editingAutorIndex: null,
+        editingLibroIndex: null
+      },
+      mounted() {
+        // Obtener autores de localStorage al cargar la página
+        if (localStorage.getItem('autores')) {
+          this.autores = JSON.parse(localStorage.getItem('autores'));
+        }
+        // Obtener libros de localStorage al cargar la página
+        if (localStorage.getItem('libros')) {
+          this.libros = JSON.parse(localStorage.getItem('libros'));
+        }
+      },
+      methods: {
+        addOrUpdateAutor() {
+          if (this.autor.nombre && this.autor.codigo && this.autor.pais && this.autor.telefono) {
+            if (this.editingAutorIndex === null) {
+              this.autores.push({ ...this.autor });
+            } else {
+              this.autores[this.editingAutorIndex] = { ...this.autor };
+              this.editingAutorIndex = null;
+            }
+            localStorage.setItem('autores', JSON.stringify(this.autores));
+            this.autor = { nombre: '', codigo: '', pais: '', telefono: '' };
+          } else {
+            alert('Todos los campos son obligatorios');
+          }
+        },
+        editAutor(index) {
+          this.autor = { ...this.autores[index] };
+          this.editingAutorIndex = index;
+        },
+        deleteAutor(index) {
+          this.autores.splice(index, 1);
+          localStorage.setItem('autores', JSON.stringify(this.autores));
+        },
+        addOrUpdateLibro() {
+          if (this.libro.titulo && this.libro.autor && this.libro.isbn && this.libro.editorial && this.libro.edicion) {
+            if (this.editingLibroIndex === null) {
+              this.libros.push({ ...this.libro });
+            } else {
+              this.libros[this.editingLibroIndex] = { ...this.libro };
+              this.editingLibroIndex = null;
+            }
+            localStorage.setItem('libros', JSON.stringify(this.libros));
+            this.libro = { titulo: '', autor: '', isbn: '', editorial: '', edicion: '' };
+          } else {
+            alert('Todos los campos son obligatorios');
+          }
+        },
+        editLibro(index) {
+          this.libro = { ...this.libros[index] };
+          this.editingLibroIndex = index;
+        },
+        deleteLibro(index) {
+          this.libros.splice(index, 1);
+          localStorage.setItem('libros', JSON.stringify(this.libros));
+        }
+      }
+    });
+  </script>
+</body>
+</html>
